@@ -4,11 +4,16 @@ using namespace std;
 
 int party;
 int port = 12345;
+int threads = 4;
 NetIO * netio;
 void setup() {
 	usleep(100);
-	netio =  new emp::NetIO(party == emp::ALICE ? nullptr : "127.0.0.1", port, true);
-	emp::setup_semi_honest(netio, party,  1024);
+	NetIO *ios[threads];
+	for(int i = 0; i < threads; ++i)
+		ios[i] = new NetIO(party==ALICE ? nullptr : "127.0.0.1", port+i);
+	emp::setup_semi_honest(ios, party,  threads, 1024);
+	for(int i = 0; i < threads; ++i)
+		delete ios[i];
 }
 void done() {
 	delete netio;

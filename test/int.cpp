@@ -38,11 +38,14 @@ void scratch_pad() {
 	cout << "LZ "<<a.leading_zeros().reveal<string>(PUBLIC)<<endl;
 }
 int main(int argc, char** argv) {
-	int port, party;
+	int port, party, threads = 4;
 	parse_party_and_port(argv, &party, &port);
-	NetIO * io = new NetIO(party==ALICE ? nullptr : "127.0.0.1", port);
 
-	setup_semi_honest(io, party);
+	NetIO *ios[threads];
+	for(int i = 0; i < threads; ++i)
+		ios[i] = new NetIO(party==ALICE ? nullptr : "127.0.0.1", port+i);
+
+	setup_semi_honest(ios, party, threads);
 
 //	scratch_pad();return 0;
 	test_int<std::plus<int>, std::plus<Integer>>(party);
@@ -56,5 +59,7 @@ int main(int argc, char** argv) {
 	test_int<std::bit_xor<int>, std::bit_xor<Integer>>(party);
 
 	finalize_semi_honest();
-	delete io;
+	for(int i = 0; i < threads; ++i)
+		delete ios[i];
+	return 0;
 }

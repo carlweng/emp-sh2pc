@@ -3,7 +3,7 @@ using namespace emp;
 using namespace std;
 const string circuit_file_location = macro_xstr(EMP_CIRCUIT_PATH);
 
-int port, party;
+int port, party, threads = 4;
 string file = circuit_file_location+"/bristol_format/AES-non-expanded.txt";//adder_32bit.txt";
 BristolFormat cf(file.c_str());
 
@@ -20,11 +20,14 @@ void test() {
 }
 int main(int argc, char** argv) {
 	parse_party_and_port(argv, &party, &port);
-	NetIO* io = new NetIO(party==ALICE?nullptr:"127.0.0.1", port);
+	NetIO *ios[threads];
+	for(int i = 0; i < threads; ++i)
+		ios[i] = new NetIO(party==ALICE?nullptr:"127.0.0.1", port+i);
 
-	setup_semi_honest(io, party);
+	setup_semi_honest(ios, party, threads);
 	test();
 	
 	finalize_semi_honest();
-	delete io;
+	for(int i = 0; i < threads; ++i)
+		delete ios[i];
 }

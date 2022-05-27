@@ -40,17 +40,21 @@ void test_sort(int party) {
 }
 
 int main(int argc, char** argv) {
-	int port, party;
+	int port, party, threads = 4;
 	parse_party_and_port(argv, &party, &port);
 	int num = 20;
 	if(argc > 3)
 		num = atoi(argv[3]);
-	NetIO * io = new NetIO(party==ALICE ? nullptr : "127.0.0.1", port);
+	NetIO *ios[threads];
+	for(int i = 0; i < threads; ++i)
+		ios[i] = new NetIO(party==ALICE ? nullptr : "127.0.0.1", port+i);
 
-	setup_semi_honest(io, party);
+	setup_semi_honest(ios, party, threads);
 	test_millionare(party, num);
 //	test_sort(party);
 	cout << CircuitExecution::circ_exec->num_and()<<endl;
 	finalize_semi_honest();
-	delete io;
+	for(int i = 0; i < threads; ++i)
+		delete ios[i];
+	return 0;
 }

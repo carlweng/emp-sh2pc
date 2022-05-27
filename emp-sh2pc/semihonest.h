@@ -6,15 +6,15 @@
 namespace emp {
 
 template<typename IO>
-inline SemiHonestParty<IO>* setup_semi_honest(IO* io, int party, int batch_size = 1024*16) {
+inline SemiHonestParty<IO>* setup_semi_honest(IO** ios, int party, int threads, int batch_size = 1024*16) {
 	if(party == ALICE) {
-		HalfGateGen<IO> * t = new HalfGateGen<IO>(io);
+		HalfGateGen<IO> * t = new HalfGateGen<IO>(ios[0]);
 		CircuitExecution::circ_exec = t;
-		ProtocolExecution::prot_exec = new SemiHonestGen<IO>(io, t);
+		ProtocolExecution::prot_exec = new SemiHonestGen<IO>(ios, t, threads);
 	} else {
-		HalfGateEva<IO> * t = new HalfGateEva<IO>(io);
+		HalfGateEva<IO> * t = new HalfGateEva<IO>(ios[0]);
 		CircuitExecution::circ_exec = t;
-		ProtocolExecution::prot_exec = new SemiHonestEva<IO>(io, t);
+		ProtocolExecution::prot_exec = new SemiHonestEva<IO>(ios, t, threads);
 	}
 	return (SemiHonestParty<IO>*)ProtocolExecution::prot_exec;
 }

@@ -1,10 +1,10 @@
 #include "emp-sh2pc/emp-sh2pc.h"
 using namespace emp;
 using namespace std;
-NetIO * io;
-int party;
+int party, threads = 4;
 
-void test_bit() {
+void test_bit(NetIO **ios) {
+	NetIO *io = ios[0];
 	bool b[] = {true, false};
 	int p[] = {PUBLIC, ALICE, BOB};
 
@@ -78,9 +78,13 @@ void test_bit() {
 int main(int argc, char** argv) {
 	int port;
 	parse_party_and_port(argv, &party, &port);
-	io = new NetIO(party==ALICE?nullptr:"127.0.0.1", port);
-	setup_semi_honest(io, party);
-	test_bit();
+	NetIO *ios[threads];
+	for(int i = 0; i < threads; ++i)
+		ios[i] = new NetIO(party==ALICE?nullptr:"127.0.0.1", port+i);
+	setup_semi_honest(ios, party, threads);
+	test_bit(ios);
 	finalize_semi_honest();
-	delete io;
+	for(int i = 0; i < threads; ++i)
+		delete ios[i];
+	return 0;
 }

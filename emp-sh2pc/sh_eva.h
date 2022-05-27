@@ -5,11 +5,12 @@
 namespace emp {
 template<typename IO>
 class SemiHonestEva: public SemiHonestParty<IO> { public:
+	using SemiHonestParty<IO>::io;
 	HalfGateEva<IO> * gc;
 	PRG prg;
-	SemiHonestEva(IO *io, HalfGateEva<IO> * gc): SemiHonestParty<IO>(io, BOB) {
+	SemiHonestEva(IO **ios, HalfGateEva<IO> * gc, int threads): SemiHonestParty<IO>(ios, threads, BOB) {
 		this->gc = gc;	
-		this->ot->setup_recv();
+		this->ot->setup();
 		block seed; this->io->recv_block(&seed, 1);
 		this->shared_prg.reseed(&seed);
 		refill();

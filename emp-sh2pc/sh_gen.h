@@ -6,12 +6,11 @@ namespace emp {
 
 template<typename IO>
 class SemiHonestGen: public SemiHonestParty<IO> { public:
+	using SemiHonestParty<IO>::io;
 	HalfGateGen<IO> * gc;
-	SemiHonestGen(IO* io, HalfGateGen<IO>* gc): SemiHonestParty<IO>(io, ALICE) {
+	SemiHonestGen(IO** ios, HalfGateGen<IO>* gc, int threads): SemiHonestParty<IO>(ios, threads, ALICE) {
 		this->gc = gc;
-		bool delta_bool[128];
-		block_to_bool(delta_bool, gc->delta);
-		this->ot->setup_send(delta_bool);
+		this->ot->setup(gc->delta);
 		block seed;
 		PRG prg;
 		prg.random_block(&seed, 1);
